@@ -306,6 +306,15 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player, 
     return profile;
   }
 
+  @Override
+  public void setGameProfile(GameProfile profile) {
+    if (profile == null){
+      throw new IllegalArgumentException("GameProfile cannot be NULL");
+    }
+    this.profile = profile;
+    //updateBackendProfile();
+  }
+
   public MinecraftConnection getConnection() {
     return connection;
   }

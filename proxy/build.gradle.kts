@@ -12,9 +12,9 @@ application {
 }
 
 tasks {
-    withType<Checkstyle> {
-        exclude("**/com/velocitypowered/proxy/protocol/packet/**")
-    }
+    //withType<Checkstyle> {
+    //    exclude("**/com/velocitypowered/proxy/protocol/packet/**")
+    //}
 
     jar {
         manifest {

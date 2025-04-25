@@ -474,4 +474,9 @@ public interface Player extends
    * @sinceMinecraft 1.21
    */
   void setServerLinks(@NotNull List<ServerLink> links);
+
+  /**
+   * Sets the gameprofile
+   */
+  void setGameProfile(GameProfile profile);
 }
