@@ -13,6 +13,8 @@ import com.velocitypowered.api.event.annotation.AwaitingEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.velocitypowered.api.util.GameProfile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,6 +38,7 @@ public final class PreLoginEvent implements ResultedEvent<PreLoginEvent.PreLogin
   private final String username;
   private final @Nullable UUID uuid;
   private PreLoginComponentResult result;
+  private GameProfile customProfile;
 
   /**
    * Creates a new instance, without an associated UUID.
@@ -61,6 +64,7 @@ public final class PreLoginEvent implements ResultedEvent<PreLoginEvent.PreLogin
     this.username = Preconditions.checkNotNull(username, "username");
     this.uuid = uuid;
     this.result = PreLoginComponentResult.allowed();
+    this.customProfile = null;
   }
 
   public InboundConnection getConnection() {
@@ -91,6 +95,18 @@ public final class PreLoginEvent implements ResultedEvent<PreLoginEvent.PreLogin
   @Override
   public void setResult(final @NonNull PreLoginComponentResult result) {
     this.result = Preconditions.checkNotNull(result, "result");
+  }
+
+  public void setCustomProfile(GameProfile profile) {
+    if (profile == null){
+      throw new IllegalArgumentException("Custom GameProfile cannot be null");
+    }
+    this.customProfile = profile;
+    this.result = PreLoginComponentResult.allowed();
+  }
+
+  public GameProfile getCustomProfile() {
+    return this.customProfile;
   }
 
   @Override

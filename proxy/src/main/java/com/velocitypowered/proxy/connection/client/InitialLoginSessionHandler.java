@@ -53,6 +53,8 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicReference;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.LogManager;
@@ -119,9 +121,15 @@ public class InitialLoginSessionHandler implements MinecraftSessionHandler {
     }
     inbound.setPlayerKey(playerKey);
     this.login = packet;
-
     final PreLoginEvent event = new PreLoginEvent(inbound, login.getUsername(), login.getHolderUuid());
+    AtomicReference<GameProfile> profile = new AtomicReference<>();
     server.getEventManager().fire(event).thenRunAsync(() -> {
+      GameProfile customProfile = event.getCustomProfile();
+      if (customProfile != null) {
+        profile.set(customProfile);
+      } else {
+        profile.set(GameProfile.forOfflinePlayer(login.getUsername()));
+      }
       if (mcConnection.isClosed()) {
         // The player was disconnected
         return;
@@ -142,8 +150,8 @@ public class InitialLoginSessionHandler implements MinecraftSessionHandler {
         }
 
         mcConnection.eventLoop().execute(() -> {
-          if (!result.isForceOfflineMode()
-              && (server.getConfiguration().isOnlineMode() || result.isOnlineModeAllowed())) {
+          // result.isOnlineModeAllowed should be false when using custom
+          if (server.getConfiguration().isOnlineMode() && result.isOnlineModeAllowed()) {
             // Request encryption.
             EncryptionRequestPacket request = generateEncryptionRequest();
             this.verify = Arrays.copyOf(request.getVerifyToken(), 4);
@@ -152,7 +160,7 @@ public class InitialLoginSessionHandler implements MinecraftSessionHandler {
           } else {
             mcConnection.setActiveSessionHandler(StateRegistry.LOGIN,
                 new AuthSessionHandler(server, inbound,
-                    GameProfile.forOfflinePlayer(login.getUsername()), false));
+                    profile.get(), false));
           }
         });
       });
