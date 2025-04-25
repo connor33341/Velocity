@@ -6,17 +6,21 @@ plugins {
 extensions.configure<PublishingExtension> {
     repositories {
         maven {
-            credentials(PasswordCredentials::class.java)
+            //credentials(PasswordCredentials::class.java)
 
-            name = "paper"
-            val base = "https://repo.papermc.io/repository/maven"
-            val releasesRepoUrl = "$base-releases/"
-            val snapshotsRepoUrl = "$base-snapshots/"
-            setUrl(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+            name = "github"
+            url = uri("https://maven.pkg.github.com/connor33341/Velocity")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("githubUsername")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("githubPassword") //User Token
+            }
         }
     }
     publications {
-        create<MavenPublication>("maven") {
+        register<MavenPublication>("maven") {
+            from(components["java"])
+        }
+        /*create<MavenPublication>("maven") {
             from(components["java"])
             pom {
                 name.set("Velocity")
@@ -28,6 +32,6 @@ extensions.configure<PublishingExtension> {
                     developerConnection.set("scm:git:https://github.com/PaperMC/Velocity.git")
                 }
             }
-        }
+        }*/
     }
 }
